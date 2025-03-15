@@ -1,3 +1,8 @@
+# Haueull_Chun Project - 2025-03-15
+
+## 프로젝트 업데이트 내역
+- 2025-03-15: 첫 번째 커밋
+
 # HooBank-A Modern UI/UX Landing Page using Next.JS and TailwindCSS
 
 ![Screenshot 2023-08-11 213008](https://github.com/omunite215/Hoobank/assets/78680563/e33352b1-ff79-49e7-a9e1-4eaf995ce2c6)
