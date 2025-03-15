@@ -1,10 +1,13 @@
 "use client";
 import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useSidebar } from "../SidebarContext";
 
 const Sidebar = () => {
   const pathname = usePathname();
+  const router = useRouter();
+  const { isSidebarOpen, toggleSidebar } = useSidebar();
 
   const menuItems = [
     {
@@ -54,57 +57,94 @@ const Sidebar = () => {
     },
   ];
 
+  const authItems = [
+    {
+      title: "로그인",
+      href: "/login",
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+        </svg>
+      ),
+    },
+    {
+      title: "회원가입",
+      href: "/register",
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+        </svg>
+      ),
+    },
+  ];
+
+  // 메뉴 항목 클릭 시 사이드바 닫기
+  const handleMenuClick = (href: string) => {
+    router.push(href);
+    toggleSidebar(); // 사이드바 닫기
+  };
+
   return (
-    <div className="w-64 bg-white shadow-md h-screen fixed left-0 top-0 overflow-y-auto">
-      <div className="p-4 border-b">
+    <div 
+      className={`w-64 bg-white shadow-md h-screen fixed left-0 top-0 overflow-y-auto transition-transform duration-300 ease-in-out z-20 font-pretendard ${
+        isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+      }`}
+    >
+      <div className="p-4 border-b flex items-center">
         <Link href="/" className="flex items-center">
-          <span className="text-2xl font-bold text-blue-600">MatDash</span>
+          <span className="text-2xl font-bold text-indigo-600">MatDash</span>
         </Link>
       </div>
       <div className="p-4">
-        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">홈</h2>
-        <ul className="space-y-1">
-          {menuItems.map((item, index) => (
-            <li key={index}>
-              <Link
-                href={item.href}
-                className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${
-                  pathname === item.href
-                    ? "bg-blue-50 text-blue-600"
-                    : "text-gray-700 hover:bg-gray-100"
-                }`}
-              >
-                <span className="mr-3">{item.icon}</span>
-                {item.title}
-              </Link>
-            </li>
-          ))}
-        </ul>
-        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mt-6 mb-2">인증</h2>
-        <ul className="space-y-1">
-          <li>
-            <Link
-              href="/login"
-              className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-              </svg>
-              로그인
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/register"
-              className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-              </svg>
-              회원가입
-            </Link>
-          </li>
-        </ul>
+        <div className="mb-6">
+          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">홈</h2>
+          <ul className="space-y-1">
+            {menuItems.map((item, index) => (
+              <li key={index}>
+                <a
+                  href={item.href}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleMenuClick(item.href);
+                  }}
+                  className={`flex items-center px-3 py-2 rounded-md text-sm font-medium cursor-pointer ${
+                    pathname === item.href
+                      ? "bg-indigo-50 text-indigo-600"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  <span className="mr-3">{item.icon}</span>
+                  {item.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+        
+        <div>
+          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">인증</h2>
+          <ul className="space-y-1">
+            {authItems.map((item, index) => (
+              <li key={index}>
+                <a
+                  href={item.href}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleMenuClick(item.href);
+                  }}
+                  className={`flex items-center px-3 py-2 rounded-md text-sm font-medium cursor-pointer ${
+                    pathname === item.href
+                      ? "bg-indigo-50 text-indigo-600"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  <span className="mr-3">{item.icon}</span>
+                  {item.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );
