@@ -21,7 +21,8 @@ export default function Login() {
     console.log("Logging in with:", accountId, password);
     
     // 로그인 성공 시 대시보드로 이동
-    router.push("/dashboard");
+    // replace 옵션을 사용하여 히스토리 스택에 현재 페이지를 남기지 않음
+    router.replace("/dashboard/common/user/templates");
   };
 
   return (
