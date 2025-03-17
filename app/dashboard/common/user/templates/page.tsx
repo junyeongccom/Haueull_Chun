@@ -1,31 +1,68 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { getUsers, User } from "../../../../api/users";
+import { getUsers, deleteUser, User } from "../../../../api/users";
 
 const Dashboard = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleteSuccess, setDeleteSuccess] = useState<string | null>(null);
+
+  // 사용자 데이터 가져오기 함수
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const data = await getUsers();
+      setUsers(data);
+      setError(null);
+    } catch (err) {
+      setError("사용자 데이터를 불러오는 중 오류가 발생했습니다.");
+      console.error("Error fetching users:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     // 컴포넌트 마운트 시 사용자 데이터 가져오기
-    const fetchUsers = async () => {
-      try {
-        setLoading(true);
-        const data = await getUsers();
-        setUsers(data);
-        setError(null);
-      } catch (err) {
-        setError("사용자 데이터를 불러오는 중 오류가 발생했습니다.");
-        console.error("Error fetching users:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchUsers();
   }, []);
+
+  // 사용자 삭제 함수
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm(`정말로 사용자 ID: ${userId}를 삭제하시겠습니까?`)) {
+      return;
+    }
+
+    try {
+      setDeleteLoading(userId);
+      setDeleteError(null);
+      setDeleteSuccess(null);
+
+      const success = await deleteUser(userId);
+      
+      if (success) {
+        setDeleteSuccess(`사용자 ID: ${userId}가 성공적으로 삭제되었습니다.`);
+        // 사용자 목록 다시 불러오기
+        fetchUsers();
+      } else {
+        setDeleteError(`사용자 ID: ${userId} 삭제 중 오류가 발생했습니다.`);
+      }
+    } catch (err) {
+      setDeleteError(`사용자 ID: ${userId} 삭제 중 오류가 발생했습니다.`);
+      console.error("Error deleting user:", err);
+    } finally {
+      setDeleteLoading(null);
+      // 3초 후 성공/실패 메시지 숨기기
+      setTimeout(() => {
+        setDeleteSuccess(null);
+        setDeleteError(null);
+      }, 3000);
+    }
+  };
 
   return (
     <>
@@ -33,6 +70,18 @@ const Dashboard = () => {
         <div className="col-span-12">
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-bold mb-4">사용자 목록</h2>
+            
+            {deleteSuccess && (
+              <div className="mb-4 bg-green-100 text-green-700 p-4 rounded-md">
+                {deleteSuccess}
+              </div>
+            )}
+            
+            {deleteError && (
+              <div className="mb-4 bg-red-100 text-red-700 p-4 rounded-md">
+                {deleteError}
+              </div>
+            )}
             
             {loading ? (
               <div className="flex justify-center items-center h-40">
@@ -85,8 +134,12 @@ const Dashboard = () => {
                             <button className="text-indigo-600 hover:text-indigo-900 mr-3">
                               상세
                             </button>
-                            <button className="text-red-600 hover:text-red-900">
-                              삭제
+                            <button 
+                              className={`text-red-600 hover:text-red-900 ${deleteLoading === user.user_id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                              onClick={() => handleDeleteUser(user.user_id)}
+                              disabled={deleteLoading === user.user_id}
+                            >
+                              {deleteLoading === user.user_id ? '삭제 중...' : '삭제'}
                             </button>
                           </td>
                         </tr>

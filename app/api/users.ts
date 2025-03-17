@@ -129,4 +129,30 @@ export async function loginUser(loginData: LoginRequest): Promise<User | null> {
     console.error('로그인 실패:', error);
     return null;
   }
+}
+
+/**
+ * 사용자 삭제 함수
+ * @param {string} userId 삭제할 사용자 ID
+ * @returns {Promise<boolean>} 삭제 성공 여부
+ */
+export async function deleteUser(userId: string): Promise<boolean> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/customer/delete`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ user_id: userId }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API 요청 실패: ${response.status}`);
+    }
+
+    return true;
+  } catch (error) {
+    console.error(`사용자 ID ${userId} 삭제 실패:`, error);
+    return false;
+  }
 } 
