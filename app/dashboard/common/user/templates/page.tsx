@@ -3,32 +3,47 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { getUsers, deleteUser, User } from "../../../../api/users";
 
+// 대시보드 상태 인터페이스 정의
+interface DashboardState {
+  users: User[];
+  loading: boolean;
+  error: string | null;
+  deleteLoading: string | null;
+  deleteError: string | null;
+  deleteSuccess: string | null;
+}
+
 const Dashboard = () => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
-  const [deleteSuccess, setDeleteSuccess] = useState<string | null>(null);
+  // 인터페이스를 사용한 상태 초기화
+  const [state, setState] = useState<DashboardState>({
+    users: [],
+    loading: true,
+    error: null,
+    deleteLoading: null,
+    deleteError: null,
+    deleteSuccess: null
+  });
 
   // 사용자 데이터 가져오기 함수
-  const fetchUsers = async () => {
+  const loadUsers = async () => {
     try {
-      setLoading(true);
+      setState(prev => ({ ...prev, loading: true }));
       const data = await getUsers();
-      setUsers(data);
-      setError(null);
+      setState(prev => ({ ...prev, users: data, error: null }));
     } catch (err) {
-      setError("사용자 데이터를 불러오는 중 오류가 발생했습니다.");
-      console.error("Error fetching users:", err);
+      setState(prev => ({ 
+        ...prev, 
+        error: "사용자 데이터를 불러오는 중 오류가 발생했습니다." 
+      }));
+      console.error("Error loading users:", err);
     } finally {
-      setLoading(false);
+      setState(prev => ({ ...prev, loading: false }));
     }
   };
 
   useEffect(() => {
     // 컴포넌트 마운트 시 사용자 데이터 가져오기
-    fetchUsers();
+    loadUsers();
   }, []);
 
   // 사용자 삭제 함수
@@ -38,31 +53,45 @@ const Dashboard = () => {
     }
 
     try {
-      setDeleteLoading(userId);
-      setDeleteError(null);
-      setDeleteSuccess(null);
+      setState(prev => ({ 
+        ...prev, 
+        deleteLoading: userId, 
+        deleteError: null, 
+        deleteSuccess: null 
+      }));
 
       const success = await deleteUser(userId);
       
       if (success) {
-        setDeleteSuccess(`사용자 ID: ${userId}가 성공적으로 삭제되었습니다.`);
+        setState(prev => ({ 
+          ...prev, 
+          deleteSuccess: `사용자 ID: ${userId}가 성공적으로 삭제되었습니다.` 
+        }));
         // 사용자 목록 다시 불러오기
-        fetchUsers();
+        loadUsers();
       } else {
-        setDeleteError(`사용자 ID: ${userId} 삭제 중 오류가 발생했습니다.`);
+        setState(prev => ({ 
+          ...prev, 
+          deleteError: `사용자 ID: ${userId} 삭제 중 오류가 발생했습니다.` 
+        }));
       }
     } catch (err) {
-      setDeleteError(`사용자 ID: ${userId} 삭제 중 오류가 발생했습니다.`);
+      setState(prev => ({ 
+        ...prev, 
+        deleteError: `사용자 ID: ${userId} 삭제 중 오류가 발생했습니다.` 
+      }));
       console.error("Error deleting user:", err);
     } finally {
-      setDeleteLoading(null);
+      setState(prev => ({ ...prev, deleteLoading: null }));
       // 3초 후 성공/실패 메시지 숨기기
       setTimeout(() => {
-        setDeleteSuccess(null);
-        setDeleteError(null);
+        setState(prev => ({ ...prev, deleteSuccess: null, deleteError: null }));
       }, 3000);
     }
   };
+
+  // 상태 구조 분해 할당으로 가독성 향상
+  const { users, loading, error, deleteLoading, deleteError, deleteSuccess } = state;
 
   return (
     <>

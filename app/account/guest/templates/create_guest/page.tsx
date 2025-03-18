@@ -47,18 +47,30 @@ export default function CreateGuest() {
       return;
     }
     
+    // 입력된 값 확인 alert 창 표시
+    const userData = {
+      user_id: formData.user_id,
+      name: formData.name,
+      email: formData.email,
+      password: '*'.repeat(formData.password.length)
+    };
+    
+    if (!window.confirm(`입력하신 정보를 확인해주세요:\n\n${JSON.stringify(userData, null, 2)}`)) {
+      return; // 사용자가 취소한 경우 회원가입 중단
+    }
+    
     try {
       setLoading(true);
       
       // API 함수 호출
-      const userData = {
+      const registerData = {
         user_id: formData.user_id,
         name: formData.name,
         email: formData.email,
         password: formData.password
       };
       
-      const result = await createUser(userData);
+      const result = await createUser(registerData);
       
       if (!result) {
         throw new Error("회원가입에 실패했습니다.");

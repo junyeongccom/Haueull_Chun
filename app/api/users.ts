@@ -1,4 +1,5 @@
 // Swagger API에서 사용자 데이터를 가져오는 함수
+import axios from 'axios';
 
 // 사용자 데이터 타입 정의
 export interface User {
@@ -23,7 +24,7 @@ export interface LoginRequest {
 }
 
 // API 기본 URL
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'http://localhost:8000/api';
 
 // 개발 환경에서 사용할 샘플 사용자 데이터 제거
 
@@ -33,19 +34,8 @@ const API_BASE_URL = 'http://localhost:8000';
  */
 export async function getUsers(): Promise<User[]> {
   try {
-    const response = await fetch(`${API_BASE_URL}/customer/list`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`API 요청 실패: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.customers || [];
+    const response = await axios.get(`${API_BASE_URL}/customer/list`);
+    return response.data.customers || [];
   } catch (error) {
     console.error('사용자 데이터 가져오기 실패:', error);
     return []; // 오류 발생 시 빈 배열 반환
@@ -59,19 +49,8 @@ export async function getUsers(): Promise<User[]> {
  */
 export async function getUserById(userId: string): Promise<User | null> {
   try {
-    const response = await fetch(`${API_BASE_URL}/customer/${userId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`API 요청 실패: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data;
+    const response = await axios.get(`${API_BASE_URL}/customer/${userId}`);
+    return response.data;
   } catch (error) {
     console.error(`사용자 ID ${userId} 가져오기 실패:`, error);
     return null;
@@ -85,20 +64,8 @@ export async function getUserById(userId: string): Promise<User | null> {
  */
 export async function createUser(userData: CreateUserRequest): Promise<User | null> {
   try {
-    const response = await fetch(`${API_BASE_URL}/customer/create`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(userData),
-    });
-
-    if (!response.ok) {
-      throw new Error(`API 요청 실패: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data;
+    const response = await axios.post(`${API_BASE_URL}/customer/create`, userData);
+    return response.data;
   } catch (error) {
     console.error('사용자 등록 실패:', error);
     return null;
@@ -138,18 +105,7 @@ export async function loginUser(loginData: LoginRequest): Promise<User | null> {
  */
 export async function deleteUser(userId: string): Promise<boolean> {
   try {
-    const response = await fetch(`${API_BASE_URL}/customer/delete`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ user_id: userId }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`API 요청 실패: ${response.status}`);
-    }
-
+    await axios.post(`${API_BASE_URL}/customer/delete`, { user_id: userId });
     return true;
   } catch (error) {
     console.error(`사용자 ID ${userId} 삭제 실패:`, error);
