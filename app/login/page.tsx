@@ -174,7 +174,7 @@ export default function Login() {
         >
           {loading ? "로그인 중..." : "SIGN IN"}
         </button>
-        <Link href="/account/guest/templates/create_guest" className="w-full">
+        <Link href="/account/guest/new" className="w-full">
           <button className="w-full border py-2 rounded mt-2" disabled={loading}>Account Created</button>
         </Link>
         <div className="flex justify-between text-sm mt-4">
