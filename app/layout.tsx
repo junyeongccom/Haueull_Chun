@@ -19,8 +19,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={`${poppins.variable} font-serif`}>{children}</body>
+    <html lang="ko">
+      <body className={`${poppins.variable} font-pretendard`}>{children}</body>
     </html>
   );
 }

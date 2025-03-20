@@ -6,7 +6,7 @@ import UserList from "@/app/components/dashboard/UserList";
 export default async function TemplatesPage() {
   return (
     <>
-      <div className="grid grid-cols-12 gap-6">
+      <div className="grid grid-cols-12 gap-6 font-pretendard">
         <div className="lg:col-span-8 col-span-12">
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-bold mb-4">매출 및 이익 예측</h2>

@@ -146,7 +146,7 @@ const UserList: React.FC = () => {
   }, []);
   
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
+    <div className="bg-white p-6 rounded-lg shadow-md font-pretendard">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold">회원 목록</h2>
         <button

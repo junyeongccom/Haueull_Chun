@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSidebar } from "../SidebarContext";
@@ -8,10 +8,23 @@ const Sidebar = () => {
   const pathname = usePathname();
   const router = useRouter();
   const { isSidebarOpen, toggleSidebar } = useSidebar();
+  
+  // 메뉴 확장 상태 관리
+  const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
+
+  // 메뉴 확장 토글 함수
+  const toggleMenu = (title: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setExpandedMenus(prev => ({
+      ...prev,
+      [title]: !prev[title]
+    }));
+  };
 
   const menuItems = [
     {
-      title: "대시보드",
+      title: "총괄 대시보드",
       href: "/dashboard",
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -20,7 +33,7 @@ const Sidebar = () => {
       ),
     },
     {
-      title: "타이포그래피",
+      title: "요약 재무정보",
       href: "/dashboard/typography",
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -29,31 +42,49 @@ const Sidebar = () => {
       ),
     },
     {
-      title: "테이블",
+      title: "연결 재무제표",
       href: "/dashboard/table",
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
         </svg>
       ),
+      subMenus: [
+        { title: "연결 재무상태표", href: "/dashboard/table/financial-position" },
+        { title: "연결 포괄손익계산서", href: "/dashboard/table/income-statement" },
+        { title: "연결 자본변동표", href: "/dashboard/table/equity-change" },
+        { title: "연결 현금흐름표", href: "/dashboard/table/cash-flow" },
+      ],
     },
     {
-      title: "폼",
+      title: "재무제표",
       href: "/dashboard/form",
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
         </svg>
       ),
+      subMenus: [
+        { title: "재무상태표", href: "/dashboard/form/financial-position" },
+        { title: "포괄손익계산서", href: "/dashboard/form/income-statement" },
+        { title: "자본변동표", href: "/dashboard/form/equity-change" },
+        { title: "현금흐름표", href: "/dashboard/form/cash-flow" },
+      ],
     },
     {
-      title: "아이콘",
+      title: "주석",
       href: "/dashboard/icons",
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
         </svg>
       ),
+      subMenus: [
+        { title: "주석1", href: "/dashboard/icons/note1" },
+        { title: "주석2", href: "/dashboard/icons/note2" },
+        { title: "주석3", href: "/dashboard/icons/note3" },
+        { title: "주석4", href: "/dashboard/icons/note4" },
+      ],
     },
   ];
 
@@ -84,6 +115,26 @@ const Sidebar = () => {
     toggleSidebar(); // 사이드바 닫기
   };
 
+  // 하위 메뉴 항목 클릭 시 이벤트 처리
+  const handleSubMenuClick = (href: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // 상위 메뉴 클릭 이벤트 전파 방지
+    router.push(href);
+    toggleSidebar(); // 사이드바 닫기
+  };
+
+  // 메뉴 아이템에 확장 화살표 추가
+  const MenuDropdownIcon = ({ isExpanded }: { isExpanded: boolean }) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className={`h-4 w-4 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+    </svg>
+  );
+
   return (
     <div 
       className={`w-64 bg-white shadow-md h-screen fixed left-0 top-0 overflow-y-auto transition-transform duration-300 ease-in-out z-20 font-pretendard ${
@@ -101,21 +152,53 @@ const Sidebar = () => {
           <ul className="space-y-1">
             {menuItems.map((item, index) => (
               <li key={index}>
-                <a
-                  href={item.href}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleMenuClick(item.href);
-                  }}
-                  className={`flex items-center px-3 py-2 rounded-md text-sm font-medium cursor-pointer ${
-                    pathname === item.href
-                      ? "bg-indigo-50 text-indigo-600"
-                      : "text-gray-700 hover:bg-gray-100"
-                  }`}
-                >
-                  <span className="mr-3">{item.icon}</span>
-                  {item.title}
-                </a>
+                <div className="flex flex-col">
+                  <a
+                    href={item.href}
+                    onClick={(e) => {
+                      if (item.subMenus?.length) {
+                        toggleMenu(item.title, e);
+                      } else {
+                        e.preventDefault();
+                        handleMenuClick(item.href);
+                      }
+                    }}
+                    className={`flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium cursor-pointer ${
+                      pathname === item.href || pathname.startsWith(item.href + "/")
+                        ? "bg-indigo-50 text-indigo-600"
+                        : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    <div className="flex items-center">
+                      <span className="mr-3">{item.icon}</span>
+                      {item.title}
+                    </div>
+                    {item.subMenus && item.subMenus.length > 0 && (
+                      <MenuDropdownIcon isExpanded={expandedMenus[item.title] || false} />
+                    )}
+                  </a>
+                  
+                  {/* 하위 메뉴 */}
+                  {item.subMenus && item.subMenus.length > 0 && expandedMenus[item.title] && (
+                    <ul className="mt-1 pl-10 space-y-1">
+                      {item.subMenus.map((subItem, subIndex) => (
+                        <li key={subIndex}>
+                          <a
+                            href={subItem.href}
+                            onClick={(e) => handleSubMenuClick(subItem.href, e)}
+                            className={`block py-1.5 px-3 rounded-md text-sm font-medium cursor-pointer transition-all ${
+                              pathname === subItem.href
+                                ? "text-indigo-600"
+                                : "text-gray-600 hover:text-indigo-500"
+                            }`}
+                          >
+                            {subItem.title}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               </li>
             ))}
           </ul>
