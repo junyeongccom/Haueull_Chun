@@ -1,8 +1,45 @@
-"use client";
 import React from "react";
 import Link from "next/link";
+import axios from "axios";
 
-const Dashboard = () => {
+interface Member {
+  user_id: string;
+  email: string;
+  name: string;
+  password: string;
+  created_at?: string;
+}
+
+// 서버에서 데이터를 가져오는 함수
+async function getMembers() {
+  try {
+    // 서버 사이드에서 데이터 가져오기
+    const response = await fetch('http://localhost:8000/api/customer/list', {
+      cache: 'no-store', // SSR에서는 캐싱하지 않음
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`서버 오류: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log('서버에서 가져온 회원 데이터:', data);
+    return data;
+  } catch (error) {
+    console.error('회원 데이터 가져오기 실패:', error);
+    return []; // 오류 시 빈 배열 반환
+  }
+}
+
+// 서버 컴포넌트
+export default async function TemplatesPage() {
+  // 서버 사이드에서 데이터 가져오기
+  const members = await getMembers();
+
   return (
     <>
       <div className="grid grid-cols-12 gap-6">
@@ -136,14 +173,54 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+        
+        {/* 고객 목록 테이블 - SSR 방식으로 렌더링 */}
+        <div className="col-span-12">
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h2 className="text-xl font-bold mb-4">회원 목록</h2>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">회원 ID</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">이메일</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">이름</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">비밀번호</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">가입일</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {members.length > 0 ? (
+                    members.map((member: Member, index: number) => (
+                      <tr key={index}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{member.user_id}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{member.email}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{member.name}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{member.password}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {member.created_at ? new Date(member.created_at).toLocaleDateString('ko-KR') : '-'}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-4 text-center text-sm text-gray-500">
+                        회원 데이터가 없습니다.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        
         <div className="col-span-12 text-center mt-6">
           <p className="text-base text-gray-500">
-            천 재무 시스템 © 2025
+            天 재무 시스템 © 2025
           </p>
         </div>
       </div>
     </>
   );
-};
-
-export default Dashboard; 
+} 
