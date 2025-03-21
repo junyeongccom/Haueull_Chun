@@ -1,6 +1,14 @@
 "use client";
 import { useState } from "react";
-import axios from "axios";
+import api from "@/app/lib/axios";
+import { useAuthStore } from "@/store/authStore";
+
+
+export async function login(email: string, password: string) {
+  const response = await api.post('/customer/create', { email, password })
+  const token = response.data.accessToken
+  useAuthStore.getState().setAccessToken(token)
+}
 
 // 회원가입 폼 인터페이스
 export interface SignupFormData {
@@ -76,7 +84,7 @@ export const useSignupForm = ({ onSignupSuccess }: UseSignupFormProps): UseSignu
       
       try {
         // 백엔드 서버 API 요청
-        const response = await axios.post("http://localhost:8000/api/customer/create", {
+        const response = await api.post("http://localhost:8000/customer/create", {
           user_id: formData.user_id,
           email: formData.email,
           password: formData.password,
