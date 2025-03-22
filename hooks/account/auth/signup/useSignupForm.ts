@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import api from "@/app/lib/axios";
+import api from "@/lib/axios";
 import { useAuthStore } from "@/store/authStore";
 
 
@@ -83,8 +83,8 @@ export const useSignupForm = ({ onSignupSuccess }: UseSignupFormProps): UseSignu
       });
       
       try {
-        // 백엔드 서버 API 요청
-        const response = await api.post("http://localhost:8000/customer/create", {
+        // 백엔드 서버 API 요청 - API 경로 수정
+        const response = await api.post("http://localhost:8000/api/customer/create", {
           user_id: formData.user_id,
           email: formData.email,
           password: formData.password,
@@ -102,6 +102,8 @@ export const useSignupForm = ({ onSignupSuccess }: UseSignupFormProps): UseSignu
         // 성공 시 콜백 호출
         onSignupSuccess();
       } catch (apiError) {
+        console.warn("백엔드 서버 연결 실패, 로컬 스토리지에 저장합니다:", apiError);
+        
         // API 요청 실패 시 로컬 스토리지 사용
         const users = JSON.parse(localStorage.getItem('localUsers') || '[]');
         

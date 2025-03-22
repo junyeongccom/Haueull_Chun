@@ -29,7 +29,7 @@ export default function Home() {
           <Hero />
           {/* 🚀 Get Started 버튼 수정: 클릭 시 로그인 페이지로 이동 */}
           <button
-            onClick={() => router.push("/login")}
+            onClick={() => router.push("/account/auth/user/login")}
             className="mt-4 px-6 py-3 bg-blue-500 text-white rounded-lg shadow-md"
           >
             Get Started

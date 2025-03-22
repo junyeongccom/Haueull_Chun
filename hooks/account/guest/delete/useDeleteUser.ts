@@ -89,7 +89,8 @@ export const useDeleteUser = (): UseDeleteUserReturn => {
       
       // 1. 백엔드 API 호출 시도
       try {
-        await axios.delete(`http://localhost:8000/api/customer/${userId}`, {
+        // Swagger API 경로에 맞게 수정 (/api/customer/delete)
+        await axios.post(`http://localhost:8000/api/customer/delete`, { user_id: userId }, {
           headers: {
             "Content-Type": "application/json",
             "Accept": "application/json"

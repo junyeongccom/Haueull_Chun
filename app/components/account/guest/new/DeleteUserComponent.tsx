@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { useDeleteUser, User } from "@/hooks/account/guest/new/useDeleteUser";
+import { useDeleteUser, User } from "@/hooks/account/guest/delete/useDeleteUser";
 import Link from "next/link";
 
 // 삭제 확인 모달 컴포넌트

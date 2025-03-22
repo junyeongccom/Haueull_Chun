@@ -75,7 +75,11 @@ export default function Login() {
         });
         
         console.log("서버에서 가져온 회원 목록:", response.data);
-        allMembers = [...response.data];
+        
+        // 응답 구조에 맞게 데이터 추출
+        if (response.data && response.data.customers && Array.isArray(response.data.customers)) {
+          allMembers = [...response.data.customers];
+        }
       } catch (apiError) {
         console.warn("백엔드 서버에서 회원 목록을 가져오지 못했습니다:", apiError);
       }
@@ -174,7 +178,7 @@ export default function Login() {
         >
           {loading ? "로그인 중..." : "SIGN IN"}
         </button>
-        <Link href="/account/guest/new" className="w-full">
+        <Link href="/account/auth/user/signup" className="w-full">
           <button className="w-full border py-2 rounded mt-2" disabled={loading}>Account Created</button>
         </Link>
         <div className="flex justify-between text-sm mt-4">

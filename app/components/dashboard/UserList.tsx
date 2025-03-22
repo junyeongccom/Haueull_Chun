@@ -39,7 +39,11 @@ const UserList: React.FC = () => {
         });
         
         console.log("서버에서 가져온 회원 목록:", response.data);
-        allUsers = [...response.data];
+        
+        // API 응답 구조에 맞게 데이터 추출
+        if (response.data && response.data.customers && Array.isArray(response.data.customers)) {
+          allUsers = [...response.data.customers];
+        }
       } catch (apiError) {
         console.warn("백엔드 서버에서 회원 목록을 가져오지 못했습니다:", apiError);
       }
@@ -50,19 +54,16 @@ const UserList: React.FC = () => {
         if (localUsersStr) {
           const localUsers = JSON.parse(localUsersStr);
           console.log("로컬 스토리지에서 가져온 회원 목록:", localUsers);
-          
-          // 로컬 회원 데이터 추가
           allUsers = [...allUsers, ...localUsers];
         }
       } catch (localError) {
         console.warn("로컬 스토리지에서 회원 목록을 가져오지 못했습니다:", localError);
       }
       
-      console.log("전체 회원 목록:", allUsers);
       setUsers(allUsers);
     } catch (err) {
-      console.error("회원 목록 조회 중 오류 발생:", err);
-      setError("회원 목록을 불러오는데 실패했습니다.");
+      console.error("회원 목록을 가져오는 중 오류가 발생했습니다:", err);
+      setError("회원 목록을 가져오는 중 오류가 발생했습니다.");
     } finally {
       setLoading(false);
     }
@@ -75,7 +76,8 @@ const UserList: React.FC = () => {
       
       // 1. 백엔드 API 호출 시도
       try {
-        await axios.delete(`http://localhost:8000/api/customer/${userId}`, {
+        // Swagger API 경로에 맞게 수정 (/api/customer/delete)
+        await axios.post(`http://localhost:8000/api/customer/delete`, { user_id: userId }, {
           headers: {
             "Content-Type": "application/json",
             "Accept": "application/json"

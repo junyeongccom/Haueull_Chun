@@ -4,7 +4,7 @@ import Link from "next/link";
 
 const GetStarted = () => {
   return (
-    <Link href="/login">
+    <Link href="/account/auth/user/login">
       <div className="flexCenter w-[140px] h-[140px] rounded-full bg-blue-gradient p-[2px] cursor-pointer bg-blue-gradient transition-all ease-in-out delay-200 hover:text-xl hover:border-2 shadow hover:shadow-xl hover:shadow-cyan-500/50">
         <div className="flexCenter flex-col bg-primary w-[100%] h-[100%] rounded-full">
           <div className="flexStart flex-row">

@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
-import { useSignupForm, SignupFormData } from "../../../../../hooks/account/guest/new/useSignupForm";
+import { useSignupForm, SignupFormData } from "../../../../../hooks/account/auth/signup/useSignupForm";
 
 interface SignupFormComponentProps {
   onSignupSuccess?: () => void;
@@ -15,7 +15,7 @@ const SignupFormComponent: React.FC<SignupFormComponentProps> = ({ onSignupSucce
       onSignupSuccess();
     } else {
       alert("회원가입 성공!");
-      router.push("/login");
+      router.push("/account/auth/user/login");
     }
   };
 

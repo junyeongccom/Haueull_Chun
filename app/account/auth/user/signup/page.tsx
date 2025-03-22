@@ -14,7 +14,7 @@ export default function CreateGuestPage() {
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             이미 계정이 있으신가요?{" "}
-            <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
+            <Link href="/account/auth/user/login" className="font-medium text-blue-600 hover:text-blue-500">
               로그인하기
             </Link>
           </p>
