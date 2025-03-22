@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import Link from "next/link";
-import SignupFormComponent from "@/app/components/account/guest/new/SignupFormComponent";
+import SignupFormComponent from "@/components/account/auth/user/signup/SignupFormComponent";
 
 // 무상태 함수형 부모 컴포넌트
 export default function CreateGuestPage() {

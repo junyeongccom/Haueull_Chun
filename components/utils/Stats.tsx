@@ -1,4 +1,4 @@
-import { stats } from "../constants";
+import { stats } from "../../app/constants";
 
 const Stats = () => (
   <section className={`flexCenter flex-row flex-wrap sm:mb-20 mb-6`}>

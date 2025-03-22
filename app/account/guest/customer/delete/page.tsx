@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import DeleteUserComponent from "@/app/components/account/guest/new/DeleteUserComponent";
+import DeleteUserComponent from "@/components/account/guest/delete/DeleteUserComponent";
 
 // 회원 삭제 페이지 - 부모 컴포넌트 (무상태)
 export default function DeleteUserPage() {

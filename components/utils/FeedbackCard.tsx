@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
-import { zoomIn } from "../styles/animations";
+import { zoomIn } from "../../app/styles/animations";
 import { quotes } from "../../public";
 import Image, { StaticImageData } from "next/image";
 

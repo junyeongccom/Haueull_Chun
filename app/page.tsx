@@ -12,7 +12,7 @@ import {
   Clients,
   CTA,
   Footer,
-} from "./components";
+} from "../components/utils";
 
 export default function Home() {
   const router = useRouter();

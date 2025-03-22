@@ -1,6 +1,7 @@
+"use client";
 import React from "react";
 import Link from "next/link";
-import UserList from "@/app/components/dashboard/UserList";
+import UserList from "@/components/dashboard/UserList";
 
 // 서버 컴포넌트
 export default async function TemplatesPage() {
