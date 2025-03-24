@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "@/lib/axios";
 import { useRouter } from "next/navigation";
 
 // 사용자 인터페이스
@@ -44,7 +44,7 @@ export const useDeleteUser = (): UseDeleteUserReturn => {
       
       // 1. 백엔드 API 호출 시도
       try {
-        const response = await axios.get("http://localhost:8000/api/customer/list", {
+        const response = await api.get("/api/customer/list", {
           headers: {
             "Content-Type": "application/json",
             "Accept": "application/json"
@@ -86,16 +86,17 @@ export const useDeleteUser = (): UseDeleteUserReturn => {
   const deleteUser = async (userId: string): Promise<boolean> => {
     try {
       setLoading(true);
+      setError(null);
       
-      // 1. 백엔드 API 호출 시도
+      console.log("삭제할 회원 ID:", userId);
+      
       try {
         // Swagger API 경로에 맞게 수정 (/api/customer/delete)
-        await axios.post(`http://localhost:8000/api/customer/delete`, { user_id: userId }, {
+        await api.post("/api/customer/delete", { user_id: userId }, {
           headers: {
             "Content-Type": "application/json",
             "Accept": "application/json"
-          },
-          timeout: 3000
+          }
         });
         console.log("서버에서 회원 삭제 성공");
       } catch (apiError) {

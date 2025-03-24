@@ -5,7 +5,7 @@ import { useAuthStore } from "@/store/authStore";
 
 
 export async function login(email: string, password: string) {
-  const response = await api.post('/customer/create', { email, password })
+  const response = await api.post('/api/customer/create', { email, password })
   const token = response.data.accessToken
   useAuthStore.getState().setAccessToken(token)
 }
@@ -83,8 +83,8 @@ export const useSignupForm = ({ onSignupSuccess }: UseSignupFormProps): UseSignu
       });
       
       try {
-        // 백엔드 서버 API 요청 - API 경로 수정
-        const response = await api.post("http://localhost:8000/api/customer/create", {
+        // 백엔드 서버 API 요청 - API 경로 수정 (상대 경로 사용)
+        const response = await api.post("/api/customer/create", {
           user_id: formData.user_id,
           email: formData.email,
           password: formData.password,
@@ -98,6 +98,15 @@ export const useSignupForm = ({ onSignupSuccess }: UseSignupFormProps): UseSignu
         });
         
         console.log("회원가입 성공 응답:", response.data);
+        
+        // 토큰이 있다면 Zustand 스토어에 저장
+        if (response.data && response.data.accessToken) {
+          useAuthStore.getState().setAccessToken(response.data.accessToken);
+        } else {
+          // 서버가 토큰을 제공하지 않는 경우 목업 토큰 생성
+          const mockToken = `mock_token_${formData.user_id}_${Date.now()}`;
+          useAuthStore.getState().setAccessToken(mockToken);
+        }
         
         // 성공 시 콜백 호출
         onSignupSuccess();

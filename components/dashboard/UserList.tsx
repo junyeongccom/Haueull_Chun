@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "@/lib/axios";
 
 // 사용자 인터페이스
 interface User {
@@ -30,7 +30,7 @@ const UserList: React.FC = () => {
       
       // 1. 백엔드 API 호출 시도
       try {
-        const response = await axios.get("http://localhost:8000/api/customer/list", {
+        const response = await api.get("/api/customer/list", {
           headers: {
             "Content-Type": "application/json",
             "Accept": "application/json"
@@ -69,36 +69,31 @@ const UserList: React.FC = () => {
     }
   };
 
-  // 회원 삭제 함수
+  // 사용자 삭제 함수
   const deleteUser = async (userId: string) => {
     try {
       setLoading(true);
       
-      // 1. 백엔드 API 호출 시도
+      // 1. 백엔드 API 호출
       try {
-        // Swagger API 경로에 맞게 수정 (/api/customer/delete)
-        await axios.post(`http://localhost:8000/api/customer/delete`, { user_id: userId }, {
+        await api.post("/api/customer/delete", { user_id: userId }, {
           headers: {
             "Content-Type": "application/json",
             "Accept": "application/json"
-          },
-          timeout: 3000
+          }
         });
+        
         console.log("서버에서 회원 삭제 성공");
       } catch (apiError) {
-        // API 호출 실패 시 로컬 스토리지에서 삭제 시도
-        console.warn("백엔드 서버에서 회원 삭제에 실패했습니다:", apiError);
+        console.warn("서버에서 회원 삭제 실패:", apiError);
         
-        // 로컬 스토리지 회원 데이터 가져오기
+        // 2. 로컬 스토리지에서 삭제 시도
         const localUsersStr = localStorage.getItem('localUsers');
         if (localUsersStr) {
           let localUsers = JSON.parse(localUsersStr);
-          
-          // 해당 회원 찾기
           const userIndex = localUsers.findIndex((user: User) => user.user_id === userId);
           
           if (userIndex !== -1) {
-            // 회원 삭제
             localUsers.splice(userIndex, 1);
             localStorage.setItem('localUsers', JSON.stringify(localUsers));
             console.log("로컬 스토리지에서 회원 삭제 성공");
@@ -118,11 +113,13 @@ const UserList: React.FC = () => {
       // 성공 메시지
       alert("회원이 성공적으로 삭제되었습니다.");
       
+      // 목록 새로고침
+      fetchUsers();
+      
       return true;
     } catch (err) {
       console.error("회원 삭제 중 오류 발생:", err);
       setError("회원 삭제에 실패했습니다.");
-      setLoading(false);
       return false;
     } finally {
       setLoading(false);
