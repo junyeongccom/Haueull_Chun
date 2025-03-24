@@ -1,8 +1,8 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import api from "@/lib/axios";
-import { useAuthStore } from "@/store/authStore";
+import api, { tokenService } from "@/lib/axios";
+import { useUserStore } from "@/store/account/auth/user/store";
 
 // 사용자 입력을 위한 인터페이스
 export interface LoginCredentials {
@@ -15,8 +15,16 @@ export interface Member {
   user_id: string;
   email: string;
   name: string;
-  password: string;
+  password?: string; // 로컬 스토리지 인증에서만 사용됨
   created_at?: string;
+}
+
+// 로그인 응답 인터페이스
+interface LoginResponse {
+  status: string;
+  message: string;
+  accessToken: string;
+  user: Member;
 }
 
 // 훅의 반환 타입 정의
@@ -43,17 +51,9 @@ export const useLoginForm = ({ onLoginSuccess }: UseLoginFormProps = {}): UseLog
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const setAccessToken = useAuthStore(state => state.setAccessToken);
-
-  // 로컬 스토리지 데이터 확인 (컴포넌트 마운트 시)
-  useEffect(() => {
-    try {
-      const localUsers = localStorage.getItem('localUsers');
-      console.log('로컬 스토리지 회원 데이터:', localUsers ? JSON.parse(localUsers) : '데이터 없음');
-    } catch (err) {
-      console.error('로컬 스토리지 읽기 오류:', err);
-    }
-  }, []);
+  
+  // useUserStore 사용
+  const userStore = useUserStore();
 
   // 입력 필드 변경 핸들러
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,80 +75,110 @@ export const useLoginForm = ({ onLoginSuccess }: UseLoginFormProps = {}): UseLog
       setLoading(true);
       setError("");
       
-      // 모든 회원 데이터를 저장할 배열
-      let allMembers: Member[] = [];
-      
-      // 1. 백엔드 서버에서 회원 데이터 가져오기
-      try {
-        const response = await api.get("/api/customer/list", {
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-          },
-          timeout: 3000 // 3초 타임아웃
-        });
-        
-        console.log("서버에서 가져온 회원 목록:", response.data);
-        
-        // 응답 구조에 맞게 데이터 추출
-        if (response.data && response.data.customers && Array.isArray(response.data.customers)) {
-          allMembers = [...response.data.customers];
+      // 표준 JWT 인증을 위한 로그인 요청
+      const response = await api.post<LoginResponse>("/api/auth/login", {
+        user_id: credentials.accountId,
+        password: credentials.password
+      }, {
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
         }
-      } catch (apiError) {
-        console.warn("백엔드 서버에서 회원 목록을 가져오지 못했습니다:", apiError);
+      });
+      
+      // 응답 데이터에서 토큰과 사용자 정보 추출
+      const { accessToken, user } = response.data;
+      
+      // 토큰이 없는 경우 오류 처리
+      if (!accessToken) {
+        throw new Error("인증 토큰을 받지 못했습니다.");
       }
       
-      // 2. 로컬 스토리지에서 회원 데이터 가져오기
-      try {
-        const localUsersStr = localStorage.getItem('localUsers');
-        if (localUsersStr) {
-          const localUsers = JSON.parse(localUsersStr);
-          console.log("로컬 스토리지에서 가져온 회원 목록:", localUsers);
-          
-          // 로컬 스토리지 데이터를 allMembers에 추가
-          allMembers = [...allMembers, ...localUsers];
-        }
-      } catch (localError) {
-        console.warn("로컬 스토리지에서 회원 목록을 가져오지 못했습니다:", localError);
-      }
+      // axios의 tokenService를 통해 토큰 저장
+      tokenService.setToken(accessToken);
       
-      console.log("로그인에 사용할 전체 회원 목록:", allMembers);
+      // useUserStore에 사용자 정보 저장
+      userStore.user_id = user.user_id;
+      userStore.email = user.email;
+      userStore.name = user.name;
       
-      // 사용자 인증 확인 - 대소문자 구분 없이 비교
-      const user = allMembers.find(
-        (member: Member) => 
-          member.user_id.toLowerCase() === credentials.accountId.toLowerCase() && 
-          member.password === credentials.password
-      );
-
-      if (user) {
-        // 로그인 성공
-        console.log("로그인 성공:", user);
-        
-        // Zustand 스토어에 토큰 저장 (실제 서버가 토큰을 반환한다면 해당 토큰 사용)
-        const mockToken = `mock_token_${user.user_id}_${Date.now()}`;
-        setAccessToken(mockToken);
-        
-        // 세션 스토리지에 사용자 정보 저장
-        sessionStorage.setItem("currentUser", JSON.stringify(user));
-        
-        // 성공 콜백이 있으면 호출, 없으면 대시보드로 이동
-        if (onLoginSuccess) {
-          onLoginSuccess();
-        } else {
-          // 대시보드로 이동
-          router.push("/dashboard/common/user/templates");
-        }
+      // 세션 스토리지에 사용자 정보 저장
+      sessionStorage.setItem("currentUser", JSON.stringify(user));
+      
+      console.log("로그인 성공:", user);
+      
+      // 성공 콜백이 있으면 호출, 없으면 대시보드로 이동
+      if (onLoginSuccess) {
+        onLoginSuccess();
       } else {
-        // 로그인 실패
-        setError("아이디 또는 비밀번호가 일치하지 않습니다.");
+        // 대시보드로 이동
+        router.push("/dashboard/common/user/templates");
       }
+      
     } catch (err: any) {
       console.error("로그인 오류:", err);
-      // axios 에러 처리 개선
-      if (err.response) {
+      
+      // 백엔드 API 연결 불가능한 경우 로컬 스토리지 인증으로 폴백
+      if (err.code === 'ECONNABORTED' || err.message === 'Network Error') {
+        console.warn("백엔드 서버 연결 실패, 로컬 스토리지에서 인증 시도");
+        
+        try {
+          // 로컬 스토리지에서 사용자 조회
+          const localUsersStr = localStorage.getItem('localUsers');
+          if (localUsersStr) {
+            const localUsers = JSON.parse(localUsersStr);
+            
+            // 사용자 검증
+            const user = localUsers.find(
+              (member: Member) => 
+                member.user_id.toLowerCase() === credentials.accountId.toLowerCase() && 
+                member.password === credentials.password
+            );
+            
+            if (user) {
+              // 로컬 인증 성공 - 목업 토큰 생성
+              const mockToken = `mock_token_${user.user_id}_${Date.now()}`;
+              tokenService.setToken(mockToken);
+              
+              // useUserStore에 사용자 정보 저장
+              userStore.user_id = user.user_id;
+              userStore.email = user.email;
+              userStore.name = user.name;
+              
+              // 세션 스토리지에 사용자 정보 저장
+              sessionStorage.setItem("currentUser", JSON.stringify(user));
+              
+              console.log("로컬 인증 성공:", user);
+              
+              // 성공 콜백이 있으면 호출, 없으면 대시보드로 이동
+              if (onLoginSuccess) {
+                onLoginSuccess();
+              } else {
+                router.push("/dashboard/common/user/templates");
+              }
+              return;
+            } else {
+              setError("아이디 또는 비밀번호가 일치하지 않습니다.");
+            }
+          } else {
+            setError("사용자 정보를 찾을 수 없습니다.");
+          }
+        } catch (localErr) {
+          console.error("로컬 인증 오류:", localErr);
+          setError("로그인 처리 중 오류가 발생했습니다.");
+        }
+      } else if (err.response) {
         // 서버가 응답을 반환한 경우
-        setError(`서버 오류: ${err.response.status} - ${err.response.data.message || '로그인 중 오류가 발생했습니다.'}`);
+        const statusCode = err.response.status;
+        const message = err.response.data?.message || '로그인 중 오류가 발생했습니다.';
+        
+        if (statusCode === 401) {
+          setError("아이디 또는 비밀번호가 일치하지 않습니다.");
+        } else if (statusCode === 404) {
+          setError("사용자를 찾을 수 없습니다.");
+        } else {
+          setError(`서버 오류: ${statusCode} - ${message}`);
+        }
       } else if (err.request) {
         // 요청이 전송되었지만 응답이 없는 경우
         setError("서버에 연결할 수 없습니다. 네트워크를 확인해주세요.");

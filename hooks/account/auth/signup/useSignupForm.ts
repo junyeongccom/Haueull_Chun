@@ -1,13 +1,13 @@
 "use client";
 import { useState } from "react";
-import api from "@/lib/axios";
-import { useAuthStore } from "@/store/authStore";
+import api, { tokenService } from "@/lib/axios";
+import { useUserStore } from "@/store/account/auth/user/store";
 
 
 export async function login(email: string, password: string) {
   const response = await api.post('/api/customer/create', { email, password })
   const token = response.data.accessToken
-  useAuthStore.getState().setAccessToken(token)
+  tokenService.setToken(token)
 }
 
 // 회원가입 폼 인터페이스
@@ -44,6 +44,9 @@ export const useSignupForm = ({ onSignupSuccess }: UseSignupFormProps): UseSignu
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // useUserStore 사용
+  const userStore = useUserStore();
 
   // 입력 필드 변경 핸들러
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,14 +102,19 @@ export const useSignupForm = ({ onSignupSuccess }: UseSignupFormProps): UseSignu
         
         console.log("회원가입 성공 응답:", response.data);
         
-        // 토큰이 있다면 Zustand 스토어에 저장
+        // 토큰이 있다면 저장
         if (response.data && response.data.accessToken) {
-          useAuthStore.getState().setAccessToken(response.data.accessToken);
+          tokenService.setToken(response.data.accessToken);
         } else {
           // 서버가 토큰을 제공하지 않는 경우 목업 토큰 생성
           const mockToken = `mock_token_${formData.user_id}_${Date.now()}`;
-          useAuthStore.getState().setAccessToken(mockToken);
+          tokenService.setToken(mockToken);
         }
+        
+        // useUserStore에 사용자 정보 저장
+        userStore.user_id = formData.user_id;
+        userStore.email = formData.email;
+        userStore.name = formData.name;
         
         // 성공 시 콜백 호출
         onSignupSuccess();
@@ -137,6 +145,11 @@ export const useSignupForm = ({ onSignupSuccess }: UseSignupFormProps): UseSignu
         
         localStorage.setItem('localUsers', JSON.stringify(users));
         console.log("로컬 스토리지에 회원 정보 저장 완료");
+        
+        // useUserStore에 사용자 정보 저장
+        userStore.user_id = formData.user_id;
+        userStore.email = formData.email;
+        userStore.name = formData.name;
         
         // 성공 시 콜백 호출
         onSignupSuccess();
