@@ -20,6 +20,7 @@ EX. 팀원 A: feature/login
 2. 백업하기 (중요한 지점에서)
    git push -u origin feature/날짜-작업내용  # 원격 저장소에 푸시
 
+//
 작업 종료할 때
 1. 오늘의 작업 정리하기
    git add .                         # 모든 변경사항 스테이징
