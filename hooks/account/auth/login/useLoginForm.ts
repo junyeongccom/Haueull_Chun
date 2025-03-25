@@ -75,7 +75,7 @@ export const useLoginForm = ({ onLoginSuccess }: UseLoginFormProps = {}): UseLog
       
       // 요청 데이터 로깅
       console.log("로그인 요청 데이터:", {
-        url: "/api/auth/user/login",
+        url: "/auth/user/login",
         data: {
           user_id: credentials.accountId,
           password: credentials.password
@@ -83,7 +83,7 @@ export const useLoginForm = ({ onLoginSuccess }: UseLoginFormProps = {}): UseLog
       });
       
       // 백엔드에 로그인 요청
-      const response = await api.post<LoginResponse>("/api/auth/user/login", {
+      const response = await api.post<LoginResponse>("/auth/user/login", {
         user_id: credentials.accountId,
         password: credentials.password
       });
