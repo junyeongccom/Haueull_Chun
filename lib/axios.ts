@@ -31,10 +31,23 @@ export const tokenService = {
 tokenService.init()
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000',
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  },
+  timeout: 5000 // 5초 타임아웃
 })
 
+// 요청 인터셉터에 로깅 추가
 api.interceptors.request.use((config) => {
+  console.log('API 요청:', {
+    url: config.url,
+    method: config.method,
+    data: config.data,
+    headers: config.headers
+  });
+  
   const token = tokenService.getToken()
   if (token) {
     config.headers.Authorization = `Bearer ${token}`

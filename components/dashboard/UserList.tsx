@@ -30,7 +30,7 @@ const UserList: React.FC = () => {
       
       // 1. 백엔드 API 호출 시도
       try {
-        const response = await api.get("/api/customer/list", {
+        const response = await api.get("/api/account/customer/list", {
           headers: {
             "Content-Type": "application/json",
             "Accept": "application/json"
@@ -76,7 +76,7 @@ const UserList: React.FC = () => {
       
       // 1. 백엔드 API 호출
       try {
-        await api.post("/api/customer/delete", { user_id: userId }, {
+        await api.post("/api/account/customer/delete", { user_id: userId }, {
           headers: {
             "Content-Type": "application/json",
             "Accept": "application/json"

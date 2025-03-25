@@ -87,7 +87,7 @@ export const useSignupForm = ({ onSignupSuccess }: UseSignupFormProps): UseSignu
       
       try {
         // 백엔드 서버 API 요청 - API 경로 수정 (상대 경로 사용)
-        const response = await api.post("/api/customer/create", {
+        const response = await api.post("/api/account/customer/create", {
           user_id: formData.user_id,
           email: formData.email,
           password: formData.password,
