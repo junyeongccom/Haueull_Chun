@@ -1,10 +1,11 @@
-<<<<<<< HEAD
+"use client";
+
+import UserList from "@/components/dashboard/UserList";
+
 export default function CustomerListPage() {
-    return (
-      <div>고객 리스트 페이지입니다</div>
-    );
-  }
-  
-=======
-///
->>>>>>> 321e26b098c22d142ea7139f04988629777611ac
+  return (
+    <div className="container mx-auto p-4">
+      <UserList />
+    </div>
+  );
+}

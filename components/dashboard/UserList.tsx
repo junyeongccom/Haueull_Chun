@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import api from "@/lib/axios";
 
 // 사용자 인터페이스
@@ -12,12 +13,13 @@ interface User {
 }
 
 // 사용자 목록 클라이언트 컴포넌트
-const UserList: React.FC = () => {
+export default function UserList() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const router = useRouter();
 
   // 사용자 목록 가져오기
   const fetchUsers = async () => {
@@ -25,49 +27,11 @@ const UserList: React.FC = () => {
     setError(null);
     
     try {
-      // 저장된 모든 회원 데이터를 담을 배열
-      let allUsers: User[] = [];
-      
-      // 1. 백엔드 API 호출 시도
-      try {
-<<<<<<< HEAD
-        const response = await api.get("/api/customer/list", {
-=======
-        const response = await api.get("/api/account/customer/list", {
->>>>>>> 321e26b098c22d142ea7139f04988629777611ac
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-          },
-          timeout: 3000 // 3초 타임아웃
-        });
-        
-        console.log("서버에서 가져온 회원 목록:", response.data);
-        
-        // API 응답 구조에 맞게 데이터 추출
-        if (response.data && response.data.customers && Array.isArray(response.data.customers)) {
-          allUsers = [...response.data.customers];
-        }
-      } catch (apiError) {
-        console.warn("백엔드 서버에서 회원 목록을 가져오지 못했습니다:", apiError);
-      }
-      
-      // 2. 로컬 스토리지에서 회원 데이터 불러오기
-      try {
-        const localUsersStr = localStorage.getItem('localUsers');
-        if (localUsersStr) {
-          const localUsers = JSON.parse(localUsersStr);
-          console.log("로컬 스토리지에서 가져온 회원 목록:", localUsers);
-          allUsers = [...allUsers, ...localUsers];
-        }
-      } catch (localError) {
-        console.warn("로컬 스토리지에서 회원 목록을 가져오지 못했습니다:", localError);
-      }
-      
-      setUsers(allUsers);
+      const response = await api.get("/auth/user/list");
+      setUsers(response.data.users);
     } catch (err) {
-      console.error("회원 목록을 가져오는 중 오류가 발생했습니다:", err);
-      setError("회원 목록을 가져오는 중 오류가 발생했습니다.");
+      console.error("사용자 목록 조회 실패:", err);
+      setError("사용자 목록을 불러오는데 실패했습니다.");
     } finally {
       setLoading(false);
     }
@@ -80,11 +44,7 @@ const UserList: React.FC = () => {
       
       // 1. 백엔드 API 호출
       try {
-<<<<<<< HEAD
-        await api.post("/api/customer/delete", { user_id: userId }, {
-=======
         await api.post("/api/account/customer/delete", { user_id: userId }, {
->>>>>>> 321e26b098c22d142ea7139f04988629777611ac
           headers: {
             "Content-Type": "application/json",
             "Accept": "application/json"
@@ -151,77 +111,35 @@ const UserList: React.FC = () => {
   useEffect(() => {
     fetchUsers();
   }, []);
-  
+
+  const handleUserClick = (userId: string) => {
+    router.push(`/account/guest/customer/${userId}`);
+  };
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md font-pretendard">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">회원 목록</h2>
-        <button
-          onClick={() => fetchUsers()}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          새로고침
-        </button>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">사용자 목록</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {users.map((user) => (
+          <div
+            key={user.user_id}
+            className="bg-white p-4 rounded-lg shadow cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => handleUserClick(user.user_id)}
+          >
+            <h2 className="text-xl font-semibold">{user.name}</h2>
+            <p className="text-gray-600">{user.email}</p>
+            <p className="text-sm text-gray-500">ID: {user.user_id}</p>
+            {user.created_at && (
+              <p className="text-sm text-gray-500">
+                가입일: {new Date(user.created_at).toLocaleDateString()}
+              </p>
+            )}
+          </div>
+        ))}
       </div>
-      
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
-          <p>{error}</p>
-        </div>
-      )}
-      
-      {loading ? (
-        <div className="flex justify-center py-8">
-          <svg className="animate-spin h-8 w-8 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-        </div>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">회원 ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">이메일</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">이름</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">비밀번호</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">가입일</th>
-                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">관리</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {users.length > 0 ? (
-                users.map((user, index) => (
-                  <tr key={index} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.user_id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.password}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {user.created_at ? new Date(user.created_at).toLocaleDateString('ko-KR') : '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
-                      <button
-                        onClick={() => handleDeleteClick(user)}
-                        className="bg-red-100 text-red-600 px-3 py-1 rounded hover:bg-red-200"
-                      >
-                        삭제
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-500">
-                    회원 데이터가 없습니다.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
       
       {/* 삭제 확인 모달 */}
       {showConfirmModal && selectedUser && (
@@ -252,6 +170,4 @@ const UserList: React.FC = () => {
       )}
     </div>
   );
-};
-
-export default UserList; 
+} 
