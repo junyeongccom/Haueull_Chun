@@ -44,7 +44,11 @@ export const useDeleteUser = (): UseDeleteUserReturn => {
       
       // 1. 백엔드 API 호출 시도
       try {
+<<<<<<< HEAD
         const response = await api.get("/api/customer/list", {
+=======
+        const response = await api.get("/api/account/customer/list", {
+>>>>>>> 321e26b098c22d142ea7139f04988629777611ac
           headers: {
             "Content-Type": "application/json",
             "Accept": "application/json"
@@ -91,8 +95,13 @@ export const useDeleteUser = (): UseDeleteUserReturn => {
       console.log("삭제할 회원 ID:", userId);
       
       try {
+<<<<<<< HEAD
         // Swagger API 경로에 맞게 수정 (/api/customer/delete)
         await api.post("/api/customer/delete", { user_id: userId }, {
+=======
+        // Swagger API 경로에 맞게 수정 (/api/account/customer/delete)
+        await api.post("/api/account/customer/delete", { user_id: userId }, {
+>>>>>>> 321e26b098c22d142ea7139f04988629777611ac
           headers: {
             "Content-Type": "application/json",
             "Accept": "application/json"

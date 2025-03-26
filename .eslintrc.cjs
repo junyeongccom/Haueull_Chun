@@ -1,4 +1,5 @@
 module.exports = {
+<<<<<<< HEAD
   root: true,
   env: { browser: true, es2020: true },
   extends: [
@@ -16,3 +17,13 @@ module.exports = {
     ],
   },
 }
+=======
+  extends: [
+    'next/core-web-vitals',
+    'plugin:@typescript-eslint/recommended',
+  ],
+  parser: '@typescript-eslint/parser',
+  plugins: ['@typescript-eslint'],
+  root: true,
+};
+>>>>>>> 321e26b098c22d142ea7139f04988629777611ac
