@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import api from "@/lib/axios";
 import { useAuthStore } from "@/store/authStore";
 import axios from "axios";
+import { useUserStore } from "@/store/account/auth/user/store";
 
 // 사용자 입력을 위한 인터페이스
 export interface LoginCredentials {
@@ -97,7 +98,20 @@ export const useLoginForm = ({ onLoginSuccess }: UseLoginFormProps = {}): UseLog
       });
       
       console.log("로그인 응답:", response.data);
-      
+
+      const message = response.data.message;
+      const logged_in_user = response.data.user;
+
+      // zustand 저장
+      if (logged_in_user) {
+        useUserStore.getState().setUser({
+          user_id: logged_in_user.user_id,
+          email: logged_in_user.email,
+          name: logged_in_user.name
+        });
+        console.log("사용자 정보가 store에 저장되었습니다.");
+      }
+
       // 서버 응답 확인
       if (response.data && response.status === 200) {
         // 로그인 성공 처리
