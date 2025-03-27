@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import api from "@/lib/axios";
-import React from "react";
 
 // 사용자 인터페이스
 export interface User {
