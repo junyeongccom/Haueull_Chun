@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import api from "@/lib/axios";
+import { useUserStore } from "@/store/account/auth/user/store";
 
 // 회원가입 폼 데이터 인터페이스
 export interface SignupFormData {
@@ -26,7 +26,7 @@ interface SignupResponse {
 interface UseSignupFormReturn {
   formData: SignupFormData;
   loading: boolean;
-  error: string;
+  error: string | null;
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSubmit: () => Promise<void>;
 }
@@ -39,8 +39,13 @@ export const useSignupForm = (): UseSignupFormReturn => {
     password: "",
     name: ""
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  
+  const { signup, isLoading, error } = useUserStore((state) => ({
+    signup: state.signup,
+    isLoading: state.isLoading,
+    error: state.error
+  }));
+  
   const router = useRouter();
 
   // 입력 필드 변경 핸들러
@@ -56,32 +61,21 @@ export const useSignupForm = (): UseSignupFormReturn => {
   const handleSubmit = async () => {
     // 유효성 검사
     if (!formData.user_id || !formData.email || !formData.password || !formData.name) {
-      setError("모든 필드를 입력해주세요.");
+      useUserStore.getState().setError("모든 필드를 입력해주세요.");
       return;
     }
 
     try {
-      setLoading(true);
-      setError("");
-
-      const response = await api.post<SignupResponse>("/auth/user/signup", formData);
-      
-      if (response.data.status === "success") {
-        router.push("/auth/login");
-      } else {
-        setError(response.data.message || "회원가입에 실패했습니다.");
-      }
-    } catch (err: any) {
+      await signup(formData);
+      router.push("/account/auth/user/login");
+    } catch (err) {
       console.error("회원가입 오류:", err);
-      setError(err.response?.data?.message || "회원가입 중 오류가 발생했습니다.");
-    } finally {
-      setLoading(false);
     }
   };
 
   return {
     formData,
-    loading,
+    loading: isLoading,
     error,
     handleChange,
     handleSubmit
