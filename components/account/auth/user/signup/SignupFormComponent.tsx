@@ -9,13 +9,11 @@ interface SignupFormComponentProps {
 
 const SignupFormComponent: React.FC<SignupFormComponentProps> = ({ onSignupSuccess }) => {
   const router = useRouter();
-  const [confirmPassword, setConfirmPassword] = useState("");
   
   const handleSuccess = () => {
     if (onSignupSuccess) {
       onSignupSuccess();
     } else {
-      alert("회원가입 성공!");
       router.push("/account/auth/user/login");
     }
   };
@@ -23,15 +21,10 @@ const SignupFormComponent: React.FC<SignupFormComponentProps> = ({ onSignupSucce
   // Custom hook 사용
   const { formData, loading, error, handleChange, handleSubmit } = useSignupForm();
 
-  // confirmPassword 변경 핸들러
-  const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setConfirmPassword(e.target.value);
-  };
-
   // 폼 제출 핸들러
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.password !== confirmPassword) {
+    if (formData.password !== formData.confirmPassword) {
       alert("비밀번호가 일치하지 않습니다.");
       return;
     }
@@ -126,8 +119,8 @@ const SignupFormComponent: React.FC<SignupFormComponentProps> = ({ onSignupSucce
             required
             className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
             placeholder="비밀번호 확인"
-            value={confirmPassword}
-            onChange={handleConfirmPasswordChange}
+            value={formData.confirmPassword}
+            onChange={handleChange}
           />
         </div>
       </div>
