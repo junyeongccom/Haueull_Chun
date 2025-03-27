@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSignupForm, SignupFormData } from "../../../../../hooks/account/auth/signup/useSignupForm";
 
@@ -9,6 +9,7 @@ interface SignupFormComponentProps {
 
 const SignupFormComponent: React.FC<SignupFormComponentProps> = ({ onSignupSuccess }) => {
   const router = useRouter();
+  const [confirmPassword, setConfirmPassword] = useState("");
   
   const handleSuccess = () => {
     if (onSignupSuccess) {
@@ -22,11 +23,24 @@ const SignupFormComponent: React.FC<SignupFormComponentProps> = ({ onSignupSucce
   // Custom hook 사용
   const { formData, loading, error, handleChange, handleSubmit } = useSignupForm();
 
+  // confirmPassword 변경 핸들러
+  const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setConfirmPassword(e.target.value);
+  };
+
+  // 폼 제출 핸들러
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (formData.password !== confirmPassword) {
+      alert("비밀번호가 일치하지 않습니다.");
+      return;
+    }
+    await handleSubmit();
+    handleSuccess();
+  };
+
   return (
-    <form className="mt-8 space-y-6" onSubmit={(e) => {
-      e.preventDefault();
-      handleSubmit().then(() => handleSuccess());
-    }}>
+    <form className="mt-8 space-y-6" onSubmit={onSubmit}>
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
           {error}
@@ -112,8 +126,8 @@ const SignupFormComponent: React.FC<SignupFormComponentProps> = ({ onSignupSucce
             required
             className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
             placeholder="비밀번호 확인"
-            value={formData.confirmPassword}
-            onChange={handleChange}
+            value={confirmPassword}
+            onChange={handleConfirmPasswordChange}
           />
         </div>
       </div>
