@@ -1,4 +1,5 @@
 module.exports = {
+  root: true,
   extends: [
     'next/core-web-vitals',
     'plugin:@typescript-eslint/recommended'
@@ -7,6 +8,6 @@ module.exports = {
   plugins: ['@typescript-eslint'],
   rules: {
     '@typescript-eslint/no-explicit-any': 'off',
-    '@typescript-eslint/no-unused-vars': ['warn']
+    '@typescript-eslint/no-unused-vars': 'warn'
   }
 };
