@@ -59,8 +59,8 @@ export default function UserList() {
         const localUsersStr = localStorage.getItem('localUsers');
         if (localUsersStr) {
           const localUsers = JSON.parse(localUsersStr);
-          const filteredUsers = localUsers.filter((user: User) => user.user_id !== userId);
-          localStorage.setItem('localUsers', JSON.stringify(filteredUsers));
+          const updatedUsers = localUsers.filter((user: User) => user.user_id !== userId);
+          localStorage.setItem('localUsers', JSON.stringify(updatedUsers));
           console.log("로컬 스토리지에서 회원 삭제 성공");
         } else {
           throw new Error("로컬 저장소에 회원 데이터가 없습니다.");
@@ -68,7 +68,7 @@ export default function UserList() {
       }
       
       // UI 업데이트
-      setUsers(users.filter(user => user.user_id !== userId));
+      setUsers(prevUsers => prevUsers.filter(user => user.user_id !== userId));
       setSelectedUser(null);
       setShowConfirmModal(false);
       
@@ -85,19 +85,6 @@ export default function UserList() {
       return false;
     } finally {
       setLoading(false);
-    }
-  };
-
-  // 삭제 버튼 클릭 핸들러
-  const handleDeleteClick = (user: User) => {
-    setSelectedUser(user);
-    setShowConfirmModal(true);
-  };
-  
-  // 삭제 확인
-  const handleConfirmDelete = async () => {
-    if (selectedUser) {
-      await deleteUser(selectedUser.user_id);
     }
   };
 
@@ -135,7 +122,8 @@ export default function UserList() {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                handleDeleteClick(user);
+                setSelectedUser(user);
+                setShowConfirmModal(true);
               }}
               className="absolute top-2 right-2 p-2 text-red-600 hover:text-red-800"
             >
@@ -163,7 +151,7 @@ export default function UserList() {
                 취소
               </button>
               <button
-                onClick={handleConfirmDelete}
+                onClick={() => deleteUser(selectedUser.user_id)}
                 className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
               >
                 삭제
