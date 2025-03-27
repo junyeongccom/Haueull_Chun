@@ -7,7 +7,6 @@ interface User {
   user_id: string;
   email: string;
   name: string;
-  password: string;
   created_at?: string;
 }
 
@@ -25,44 +24,30 @@ const UserList: React.FC = () => {
     setError(null);
     
     try {
-      // 저장된 모든 회원 데이터를 담을 배열
-      let allUsers: User[] = [];
+      // 백엔드 API 호출
+      const response = await api.get("/api/account/customer/list");
+      console.log("API 요청 URL:", "/api/account/customer/list");
+      console.log("서버 응답 전체:", response);
+      console.log("서버에서 가져온 회원 목록:", response.data);
       
-      // 1. 백엔드 API 호출 시도
-      try {
-        const response = await api.get("/api/account/customer/list", {
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-          },
-          timeout: 3000 // 3초 타임아웃
-        });
-        
-        console.log("서버에서 가져온 회원 목록:", response.data);
-        
-        // API 응답 구조에 맞게 데이터 추출
-        if (response.data && response.data.customers && Array.isArray(response.data.customers)) {
-          allUsers = [...response.data.customers];
-        }
-      } catch (apiError) {
-        console.warn("백엔드 서버에서 회원 목록을 가져오지 못했습니다:", apiError);
+      // API 응답 처리
+      if (response.data && Array.isArray(response.data)) {
+        console.log("회원 데이터 설정:", response.data);
+        setUsers(response.data);
+      } else if (response.data && Array.isArray(response.data.customers)) {
+        console.log("customers 배열에서 회원 데이터 설정:", response.data.customers);
+        setUsers(response.data.customers);
+      } else {
+        console.error("서버 응답 형식이 올바르지 않습니다:", response.data);
+        setError("회원 목록을 불러오는데 실패했습니다.");
       }
-      
-      // 2. 로컬 스토리지에서 회원 데이터 불러오기
-      try {
-        const localUsersStr = localStorage.getItem('localUsers');
-        if (localUsersStr) {
-          const localUsers = JSON.parse(localUsersStr);
-          console.log("로컬 스토리지에서 가져온 회원 목록:", localUsers);
-          allUsers = [...allUsers, ...localUsers];
-        }
-      } catch (localError) {
-        console.warn("로컬 스토리지에서 회원 목록을 가져오지 못했습니다:", localError);
-      }
-      
-      setUsers(allUsers);
-    } catch (err) {
-      console.error("회원 목록을 가져오는 중 오류가 발생했습니다:", err);
+    } catch (err: any) {
+      console.error("회원 목록을 가져오는 중 오류 발생:", err);
+      console.error("오류 상세 정보:", {
+        message: err.message,
+        status: err.response?.status,
+        data: err.response?.data
+      });
       setError("회원 목록을 가져오는 중 오류가 발생했습니다.");
     } finally {
       setLoading(false);
@@ -90,7 +75,7 @@ const UserList: React.FC = () => {
         // 2. 로컬 스토리지에서 삭제 시도
         const localUsersStr = localStorage.getItem('localUsers');
         if (localUsersStr) {
-          let localUsers = JSON.parse(localUsersStr);
+          const localUsers = JSON.parse(localUsersStr);
           const userIndex = localUsers.findIndex((user: User) => user.user_id === userId);
           
           if (userIndex !== -1) {
@@ -139,8 +124,9 @@ const UserList: React.FC = () => {
     }
   };
 
-  // 컴포넌트 마운트 시 데이터 로드
+  // 컴포넌트 마운트 시와 새로고침 버튼 클릭 시 데이터 로드
   useEffect(() => {
+    console.log("UserList 컴포넌트 마운트 - fetchUsers 호출");
     fetchUsers();
   }, []);
   
@@ -177,7 +163,6 @@ const UserList: React.FC = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">회원 ID</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">이메일</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">이름</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">비밀번호</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">가입일</th>
                 <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">관리</th>
               </tr>
@@ -189,7 +174,6 @@ const UserList: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.user_id}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.password}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {user.created_at ? new Date(user.created_at).toLocaleDateString('ko-KR') : '-'}
                     </td>

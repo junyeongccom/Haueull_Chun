@@ -106,7 +106,7 @@ export const useDeleteUser = (): UseDeleteUserReturn => {
         // 로컬 스토리지 회원 데이터 가져오기
         const localUsersStr = localStorage.getItem('localUsers');
         if (localUsersStr) {
-          let localUsers = JSON.parse(localUsersStr);
+          const localUsers = JSON.parse(localUsersStr);
           
           // 해당 회원 찾기
           const userIndex = localUsers.findIndex((user: User) => user.user_id === userId);

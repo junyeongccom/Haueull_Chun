@@ -22,7 +22,11 @@ export interface Member {
 interface LoginResponse {
   status: string;
   message: string;
-  user: Member;
+  user: {
+    user_id: string;
+    email: string;
+    name: string;
+  }
 }
 
 // 훅의 반환 타입 정의
@@ -75,7 +79,7 @@ export const useLoginForm = ({ onLoginSuccess }: UseLoginFormProps = {}): UseLog
       
       // 요청 데이터 로깅
       console.log("로그인 요청 데이터:", {
-        url: "/auth/user/login",
+        url: "/api/account/user/login",
         data: {
           user_id: credentials.accountId,
           password: credentials.password
@@ -83,7 +87,7 @@ export const useLoginForm = ({ onLoginSuccess }: UseLoginFormProps = {}): UseLog
       });
       
       // 백엔드에 로그인 요청
-      const response = await api.post<LoginResponse>("/auth/user/login", {
+      const response = await api.post<LoginResponse>("/api/account/user/login", {
         user_id: credentials.accountId,
         password: credentials.password
       });
@@ -94,16 +98,22 @@ export const useLoginForm = ({ onLoginSuccess }: UseLoginFormProps = {}): UseLog
       // 응답 데이터에서 사용자 정보 추출
       const { status, message, user } = response.data;
       
-      if (status === "success") {
+      if (status === 'success') {
         // useUserStore에 사용자 정보 저장
-        userStore.user_id = user.user_id;
-        userStore.email = user.email;
-        userStore.name = user.name;
+        userStore.setUser({
+          user_id: user.user_id,
+          email: user.email,
+          name: user.name
+        });
         
         // 세션 스토리지에 사용자 정보 저장
         sessionStorage.setItem("currentUser", JSON.stringify(user));
         
-        console.log("로그인 성공:", user);
+        console.log("로그인에 성공했습니다:", user);
+
+        //const message = user.message;
+        //const logged_in_user = user.logged_in_user;
+        //zustand에 저장
         
         // 성공 콜백이 있으면 호출, 없으면 대시보드로 이동
         if (onLoginSuccess) {

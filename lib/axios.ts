@@ -31,12 +31,13 @@ export const tokenService = {
 tokenService.init()
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000',
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
   },
-  timeout: 5000 // 5초 타임아웃
+  withCredentials: false,  // 백엔드의 allow_credentials=False와 일치
+  timeout: 8000 // 8초 타임아웃 (배포 환경은 더 느릴 수 있음)
 })
 
 // 요청 인터셉터에 로깅 추가

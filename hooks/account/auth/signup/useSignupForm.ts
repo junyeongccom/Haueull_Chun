@@ -5,7 +5,7 @@ import { useUserStore } from "@/store/account/auth/user/store";
 
 
 export async function login(email: string, password: string) {
-  const response = await api.post('/api/customer/create', { email, password })
+  const response = await api.post('/api/account/customer/create', { email, password })
   const token = response.data.accessToken
   tokenService.setToken(token)
 }
