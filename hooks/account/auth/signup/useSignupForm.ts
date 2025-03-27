@@ -8,6 +8,7 @@ export interface SignupFormData {
   user_id: string;
   email: string;
   password: string;
+  confirmPassword: string;
   name: string;
 }
 
@@ -37,6 +38,7 @@ export const useSignupForm = (): UseSignupFormReturn => {
     user_id: "",
     email: "",
     password: "",
+    confirmPassword: "",
     name: ""
   });
   const [loading, setLoading] = useState(false);
