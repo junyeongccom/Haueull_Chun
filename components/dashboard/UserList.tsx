@@ -58,16 +58,10 @@ export default function UserList() {
         // 2. 로컬 스토리지에서 삭제 시도
         const localUsersStr = localStorage.getItem('localUsers');
         if (localUsersStr) {
-          let localUsers = JSON.parse(localUsersStr);
-          const userIndex = localUsers.findIndex((user: User) => user.user_id === userId);
-          
-          if (userIndex !== -1) {
-            localUsers.splice(userIndex, 1);
-            localStorage.setItem('localUsers', JSON.stringify(localUsers));
-            console.log("로컬 스토리지에서 회원 삭제 성공");
-          } else {
-            throw new Error("삭제할 회원을 찾을 수 없습니다.");
-          }
+          const localUsers = JSON.parse(localUsersStr);
+          const filteredUsers = localUsers.filter((user: User) => user.user_id !== userId);
+          localStorage.setItem('localUsers', JSON.stringify(filteredUsers));
+          console.log("로컬 스토리지에서 회원 삭제 성공");
         } else {
           throw new Error("로컬 저장소에 회원 데이터가 없습니다.");
         }
@@ -126,17 +120,27 @@ export default function UserList() {
         {users.map((user) => (
           <div
             key={user.user_id}
-            className="bg-white p-4 rounded-lg shadow cursor-pointer hover:shadow-lg transition-shadow"
-            onClick={() => handleUserClick(user.user_id)}
+            className="bg-white p-4 rounded-lg shadow cursor-pointer hover:shadow-lg transition-shadow relative"
           >
-            <h2 className="text-xl font-semibold">{user.name}</h2>
-            <p className="text-gray-600">{user.email}</p>
-            <p className="text-sm text-gray-500">ID: {user.user_id}</p>
-            {user.created_at && (
-              <p className="text-sm text-gray-500">
-                가입일: {new Date(user.created_at).toLocaleDateString()}
-              </p>
-            )}
+            <div onClick={() => handleUserClick(user.user_id)}>
+              <h2 className="text-xl font-semibold">{user.name}</h2>
+              <p className="text-gray-600">{user.email}</p>
+              <p className="text-sm text-gray-500">ID: {user.user_id}</p>
+              {user.created_at && (
+                <p className="text-sm text-gray-500">
+                  가입일: {new Date(user.created_at).toLocaleDateString()}
+                </p>
+              )}
+            </div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteClick(user);
+              }}
+              className="absolute top-2 right-2 p-2 text-red-600 hover:text-red-800"
+            >
+              삭제
+            </button>
           </div>
         ))}
       </div>

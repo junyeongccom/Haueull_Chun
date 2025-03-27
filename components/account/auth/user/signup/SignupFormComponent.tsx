@@ -1,7 +1,7 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
+import { useSignupForm } from "@/hooks/account/auth/signup/useSignupForm";
 import { useRouter } from "next/navigation";
-import { useSignupForm, SignupFormData } from "../../../../../hooks/account/auth/signup/useSignupForm";
 
 interface SignupFormComponentProps {
   onSignupSuccess?: () => void;
