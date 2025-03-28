@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
-import api, { tokenService } from "@/lib/axios";
+import api from "@/lib/axios";
 import { useUserStore } from "@/store/account/auth/user/store";
+import { tokenService } from "@/lib/auth_token";
 
 
 export async function login(email: string, password: string) {

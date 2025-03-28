@@ -1,5 +1,3 @@
-// src/lib/auth_token.ts
-
 let accessToken: string | null = null
 
 export const tokenService = {
