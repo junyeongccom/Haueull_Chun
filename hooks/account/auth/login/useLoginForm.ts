@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import api from "@/lib/axios";
 import { useUserStore } from "@/store/account/auth/user/store";
+import { tokenService } from "@/lib/auth_token";
 
 // 사용자 입력을 위한 인터페이스
 export interface LoginCredentials {
@@ -22,6 +23,7 @@ export interface Member {
 interface LoginResponse {
   status: string;
   message: string;
+  access_token: string;
   user: {
     user_id: string;
     email: string;
@@ -67,17 +69,15 @@ export const useLoginForm = ({ onLoginSuccess }: UseLoginFormProps = {}): UseLog
   };
 
   const handleLogin = async () => {
-    // 간단한 유효성 검사
     if (!credentials.accountId || !credentials.password) {
       setError("아이디와 비밀번호를 모두 입력해주세요.");
       return;
     }
-
+  
     try {
       setLoading(true);
       setError("");
-      
-      // 요청 데이터 로깅
+  
       console.log("로그인 요청 데이터:", {
         url: "/api/account/user/login",
         data: {
@@ -85,47 +85,43 @@ export const useLoginForm = ({ onLoginSuccess }: UseLoginFormProps = {}): UseLog
           password: credentials.password
         }
       });
-      
-      // 백엔드에 로그인 요청
-      const response = await api.post<LoginResponse>("/api/account/user/login", {
-        user_id: credentials.accountId,
-        password: credentials.password
-      });
-      
-      // 응답 데이터 로깅
+  
+      // ✅ refresh_token 쿠키 수신을 위해 withCredentials 설정
+      const response = await api.post<LoginResponse>(
+        "/api/account/user/login",
+        {
+          user_id: credentials.accountId,
+          password: credentials.password
+        },
+        { withCredentials: true }
+      );
+  
       console.log("서버 응답:", response.data);
-      
-      // 응답 데이터에서 사용자 정보 추출
-      const { status, message, user } = response.data;
-      
-      if (status === 'success') {
-        // useUserStore에 사용자 정보 저장
+  
+      const { status, message, user, access_token } = response.data;
+  
+      if (status === "success") {
+        // ✅ access_token 저장 (axios 인터셉터에서 자동 사용됨)
+        tokenService.setToken(access_token);
+  
+        // ✅ 사용자 정보 저장
         userStore.setUser({
           user_id: user.user_id,
           email: user.email,
           name: user.name
         });
-        
-        // 세션 스토리지에 사용자 정보 저장
+  
         sessionStorage.setItem("currentUser", JSON.stringify(user));
-        
         console.log("로그인에 성공했습니다:", user);
-
-        //const message = user.message;
-        //const logged_in_user = user.logged_in_user;
-        //zustand에 저장
-        
-        // 성공 콜백이 있으면 호출, 없으면 대시보드로 이동
+  
         if (onLoginSuccess) {
           onLoginSuccess();
         } else {
-          // 대시보드로 이동
           router.push("/dashboard/common/user/templates");
         }
       } else {
         setError(message || "로그인에 실패했습니다.");
       }
-      
     } catch (err: any) {
       console.error("로그인 오류 상세:", {
         message: err.message,
@@ -139,12 +135,11 @@ export const useLoginForm = ({ onLoginSuccess }: UseLoginFormProps = {}): UseLog
           headers: err.config?.headers
         }
       });
-      
+  
       if (err.response) {
-        // 서버가 응답을 반환한 경우
         const statusCode = err.response.status;
-        const message = err.response.data?.message || '로그인 중 오류가 발생했습니다.';
-        
+        const message = err.response.data?.message || "로그인 중 오류가 발생했습니다.";
+  
         if (statusCode === 401) {
           setError("아이디 또는 비밀번호가 일치하지 않습니다.");
         } else if (statusCode === 404) {
@@ -153,14 +148,8 @@ export const useLoginForm = ({ onLoginSuccess }: UseLoginFormProps = {}): UseLog
           setError(`서버 오류: ${statusCode} - ${message}`);
         }
       } else if (err.request) {
-        // 요청이 전송되었지만 응답이 없는 경우
-        console.error("요청은 전송됐으나 응답 없음:", {
-          request: err.request,
-          config: err.config
-        });
         setError("서버에 연결할 수 없습니다. 네트워크를 확인해주세요.");
       } else {
-        // 요청 설정 중 오류가 발생한 경우
         setError("로그인 요청 중 오류가 발생했습니다.");
       }
     } finally {
@@ -168,11 +157,5 @@ export const useLoginForm = ({ onLoginSuccess }: UseLoginFormProps = {}): UseLog
     }
   };
 
-  return {
-    credentials,
-    loading,
-    error,
-    handleChange,
-    handleLogin
-  };
+  return { credentials, loading, error, handleChange, handleLogin };
 };
