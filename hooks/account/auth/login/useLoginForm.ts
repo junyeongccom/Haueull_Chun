@@ -24,6 +24,7 @@ interface LoginResponse {
   status: string;
   message: string;
   user: Member;
+  access_token: string;
 }
 
 // 훅의 반환 타입 정의
@@ -76,7 +77,7 @@ export const useLoginForm = ({ onLoginSuccess }: UseLoginFormProps = {}): UseLog
       
       // 요청 데이터 로깅
       console.log("로그인 요청 데이터:", {
-        url: "/auth/user/login",
+        url: "/account/user/login",
         data: {
           user_id: credentials.accountId,
           password: credentials.password
@@ -84,7 +85,7 @@ export const useLoginForm = ({ onLoginSuccess }: UseLoginFormProps = {}): UseLog
       });
       
       // 백엔드에 로그인 요청
-      const response = await api.post<LoginResponse>("/auth/user/login", {
+      const response = await api.post<LoginResponse>("/account/user/login", {
         user_id: credentials.accountId,
         password: credentials.password
       });
@@ -93,7 +94,7 @@ export const useLoginForm = ({ onLoginSuccess }: UseLoginFormProps = {}): UseLog
       console.log("서버 응답:", response.data);
       
       // 응답 데이터에서 사용자 정보 추출
-      const { status, message, user } = response.data;
+      const { status, message, user, access_token } = response.data;
       
       if (status === "success") {
         // useUserStore에 사용자 정보 저장
