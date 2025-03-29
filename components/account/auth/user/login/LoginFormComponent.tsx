@@ -1,12 +1,20 @@
 "use client";
 import React from "react";
 import Link from "next/link";
-import { useLoginForm } from "../../../../../hooks/account/auth/login/useLoginForm";
+import { useLoginForm } from "@/hooks/account/auth/login/useLoginForm";
 
+// interface: 이 컴포넌트가 받는 props의 타입 정의
+// onLoginSuccess라는 Props를 줄 수도 있고, 안 줄 수도 있음. 
+// void: 함수가 실행만 됨. 값을 반환하지 않음
+// 콜백함수 사용한 이유: 컴포넌트는 로그인 로직만 담당
+// props를 주면 onLoginSuccess 실행되고, 안주면 실행 안됨
 interface LoginFormComponentProps {
   onLoginSuccess?: () => void;
 }
-
+// onLoginSuccess: 로그인 성공 후 호출되는 콜백 함수
+// React.FC: React Functional Component
+// <LoginFormComponentProps>: 이 컴포넌트는 위에서 정의한 props 타입을 따름
+// 
 const LoginFormComponent: React.FC<LoginFormComponentProps> = ({ onLoginSuccess }) => {
   const { credentials, loading, error, handleChange, handleLogin } = useLoginForm({
     onLoginSuccess
