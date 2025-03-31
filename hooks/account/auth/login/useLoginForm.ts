@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import api from "@/lib/axios";
+import axios from "axios";
 import { useUserStore } from "@/store/account/auth/user/store";
 
 // 사용자 입력을 위한 인터페이스
@@ -68,12 +68,14 @@ export const useLoginForm = ({ onLoginSuccess }: UseLoginFormProps = {}): UseLog
     // 간단한 유효성 검사
     if (!credentials.accountId || !credentials.password) {
       setError("아이디와 비밀번호를 모두 입력해주세요.");
+      alert("아이디와 비밀번호를 모두 입력해주세요.");
       return;
     }
 
     try {
       setLoading(true);
       setError("");
+      alert("1. 로그인 페이로드: " + JSON.stringify(credentials));
       
       // 요청 데이터 로깅
       console.log("로그인 요청 데이터:", {
@@ -83,15 +85,17 @@ export const useLoginForm = ({ onLoginSuccess }: UseLoginFormProps = {}): UseLog
           password: credentials.password
         }
       });
+
       
       // 백엔드에 로그인 요청
-      const response = await api.post<LoginResponse>("/account/user/login", {
+      const response = await axios.post<LoginResponse>("http://127.0.0.1:8000/api/account/user/login", {
         user_id: credentials.accountId,
         password: credentials.password
       });
       
       // 응답 데이터 로깅
       console.log("서버 응답:", response.data);
+      alert("2. 서버 응답: " + JSON.stringify(response.data));
       
       // 응답 데이터에서 사용자 정보 추출
       const { status, message, user, access_token } = response.data;
@@ -104,7 +108,7 @@ export const useLoginForm = ({ onLoginSuccess }: UseLoginFormProps = {}): UseLog
         
         // 세션 스토리지에 사용자 정보 저장
         sessionStorage.setItem("currentUser", JSON.stringify(user));
-        
+
         
         console.log("로그인 성공:", user);
         
@@ -117,6 +121,7 @@ export const useLoginForm = ({ onLoginSuccess }: UseLoginFormProps = {}): UseLog
         }
       } else {
         setError(message || "로그인에 실패했습니다.");
+        alert(message || "로그인에 실패했습니다.");
       }
       
     } catch (err: any) {
