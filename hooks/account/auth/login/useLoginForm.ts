@@ -105,6 +105,7 @@ export const useLoginForm = ({ onLoginSuccess }: UseLoginFormProps = {}): UseLog
         // 세션 스토리지에 사용자 정보 저장
         sessionStorage.setItem("currentUser", JSON.stringify(user));
         
+        
         console.log("로그인 성공:", user);
         
         // 성공 콜백이 있으면 호출, 없으면 대시보드로 이동
